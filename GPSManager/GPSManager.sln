@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.421
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GPSManager", "GPSManager.csproj", "{851C5617-E6F1-4E20-ABC2-D120F47FFDA3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GPSManager", "GPSManager.csproj", "{B5112DC5-B2D7-4602-8B79-FA7611819A1F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,15 +11,15 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{851C5617-E6F1-4E20-ABC2-D120F47FFDA3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{851C5617-E6F1-4E20-ABC2-D120F47FFDA3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{851C5617-E6F1-4E20-ABC2-D120F47FFDA3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{851C5617-E6F1-4E20-ABC2-D120F47FFDA3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B5112DC5-B2D7-4602-8B79-FA7611819A1F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B5112DC5-B2D7-4602-8B79-FA7611819A1F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B5112DC5-B2D7-4602-8B79-FA7611819A1F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B5112DC5-B2D7-4602-8B79-FA7611819A1F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {6E894271-F37B-4DD5-AEDC-9D1A314D4E09}
+		SolutionGuid = {E88EEDBB-55DF-4106-9617-8ABC5CEA73E1}
 	EndGlobalSection
 EndGlobal

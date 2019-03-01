@@ -34,7 +34,7 @@ namespace GPSManager
         private const string ConnectedStatusText = "Подключен";
         private const string DisconnectedStatusText = "Нет подключения";
 
-        private TcpGgaProvider ggaProvider;
+        private IGgaProvider ggaProvider;
         private ILayer oldLayer;
 
         public MainWindow()
@@ -49,12 +49,43 @@ namespace GPSManager
             mapControl.Map.Layers.Add(OpenStreetMap.CreateTileLayer());
         }
 
+        class Placeholder : IConnectable, IGgaProvider
+        {
+            public bool IsConnected => true;
+
+            public event Action Connected;
+            public event Action Disconnected;
+            public event Action<Gga> GgaProvided;
+
+            public Placeholder()
+            {
+                F();
+            }
+
+            async void F()
+            {
+                await Task.Delay(2000);
+                Connected?.Invoke();
+                GgaProvided?.Invoke(new Gga(55.046307, 82.963026));
+                await Task.Delay(4000);
+                Disconnected?.Invoke();
+            }
+
+            public void Dispose()
+            {
+                
+            }
+        }
+
         private void OnWindowLoaded(object sender, System.Windows.RoutedEventArgs e)
         {
-            ggaProvider = new TcpGgaProvider(Host, Port);
+            var tcpGgaProvider = new Placeholder();//new TcpGgaProvider(Host, Port);
+
+            ggaProvider = tcpGgaProvider;
             ggaProvider.GgaProvided += OnGgaProvided;
-            ggaProvider.Connected += OnGgaProviderConnected;
-            ggaProvider.Disconnected += OnGgaProviderDisconnected;
+
+            tcpGgaProvider.Connected += OnGgaProviderConnected;
+            tcpGgaProvider.Disconnected += OnGgaProviderDisconnected;
         }
 
         private void OnGgaProvided(Gga gga)

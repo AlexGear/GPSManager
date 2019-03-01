@@ -26,6 +26,11 @@ namespace GPSManager
     /// </summary>
     public partial class MainWindow : System.Windows.Window
     {
+        private const string Host = "192.168.55.250";
+        private const ushort Port = 5555;
+        private IGgaProvider ggaProvider;
+        private ILayer oldLayer;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -35,27 +40,45 @@ namespace GPSManager
         private void InitializeMapControl()
         {
             mapControl.Map.Layers.Add(OpenStreetMap.CreateTileLayer());
-            mapControl.Map.Layers.Add(CreateLayer());
         }
 
-        public static ILayer CreateLayer()
+        private void OnGgaProvided(Gga gga)
+        {
+            if(oldLayer != null)
+            {
+                mapControl.Map.Layers.Remove(oldLayer);
+            }
+            mapControl.Map.Layers.Add(oldLayer = CreateLayer(gga));
+        }
+
+        private static ILayer CreateLayer(Gga gga)
         {
             var features = new Features
             {
-                CreateSimplePoint()
+                CreatePoint(gga)
             };
 
             var memoryProvider = new MemoryProvider(features);
             return new MemoryLayer { Name = "Points with labels", DataSource = memoryProvider };
         }
 
-        private static Feature CreateSimplePoint()
+        private static Feature CreatePoint(Gga gga)
         {
-            var gga = GGA.Parse("$GNGGA,033632.40,5458.46129,N,08255.44558,E,1,04,4.21,103.1,M,-38.0,M,,*61");
             var point = SphericalMercator.FromLonLat(gga.Longitude, gga.Latitude);
             var feature = new Feature { Geometry = point };
             feature.Styles.Add(new LabelStyle { Text = "Default Label" });
             return feature;
+        }
+
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            ggaProvider?.Dispose();
+        }
+
+        private void OnWindowLoaded(object sender, System.Windows.RoutedEventArgs e)
+        {
+            ggaProvider = new TcpGgaProvider(Host, Port);
+            ggaProvider.GgaProvided += OnGgaProvided;
         }
     }
 }

@@ -93,6 +93,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="IConnectable.cs" />
     <Compile Include="TaskExtensions.cs" />
     <Compile Include="TcpGgaProvider.cs" />
     <Page Include="MainWindow.xaml">

@@ -9,11 +9,8 @@ using System.Threading;
 
 namespace GPSManager
 {
-    class TcpGgaProvider : IGgaProvider
+    class TcpGgaProvider : IGgaProvider, IConnectable
     {
-        public string Host { get; set; }
-        public ushort Port { get; set; }
-
         private const int ReadingTimeout = 2000;
         private const int ConnectionRetryInterval = 1000;
 
@@ -21,8 +18,26 @@ namespace GPSManager
         private NetworkStream stream;
         private TextReader reader;
         private volatile bool run;
+        private bool isConnected;
+
+        public string Host { get; set; }
+        public ushort Port { get; set; }
+        public bool IsConnected
+        {
+            get => isConnected;
+            private set
+            {
+                if(value != isConnected)
+                {
+                    isConnected = value;
+                    (isConnected ? Connected : Disconnected)?.Invoke();
+                }
+            }
+        }
 
         public event Action<Gga> GgaProvided;
+        public event Action Connected;
+        public event Action Disconnected;
 
         public TcpGgaProvider(string host, ushort port)
         {
@@ -55,7 +70,9 @@ namespace GPSManager
         {
             using (client = new TcpClient())
             {
+                IsConnected = false;
                 await client.ConnectAsync(Host, Port);
+                IsConnected = true;
 
                 using (stream = client.GetStream())
                 using (reader = new StreamReader(stream))
@@ -102,6 +119,7 @@ namespace GPSManager
             }
 
             run = false;
+            IsConnected = false;
             stream?.Close();
             client?.Close();
 

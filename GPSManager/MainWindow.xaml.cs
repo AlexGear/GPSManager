@@ -36,6 +36,7 @@ namespace GPSManager
 
         private IGgaProvider ggaProvider;
         private ILayer oldLayer;
+        private bool ggaProvidedFirstTime = true;
 
         public MainWindow()
         {
@@ -95,6 +96,19 @@ namespace GPSManager
                 mapControl.Map.Layers.Remove(oldLayer);
             }
             mapControl.Map.Layers.Add(oldLayer = CreateLayer(gga));
+
+            if (ggaProvidedFirstTime)
+            {
+                ggaProvidedFirstTime = false;
+                ZoomToPoint(gga);
+            }
+        }
+
+        private void ZoomToPoint(Gga gga)
+        {
+            var center = GgaToPoint(gga);
+            var offset = new Mapsui.Geometries.Point(1000, 1000);
+            mapControl.ZoomToBox(center - offset, center + offset);
         }
 
         private void OnGgaProviderConnected()
@@ -122,10 +136,17 @@ namespace GPSManager
 
         private static Feature CreatePoint(Gga gga)
         {
-            var point = SphericalMercator.FromLonLat(gga.Longitude, gga.Latitude);
-            var feature = new Feature { Geometry = point };
-            feature.Styles.Add(new Mapsui.Styles.LabelStyle { Text = "Default Label" });
+            var feature = new Feature { Geometry = GgaToPoint(gga) };
+            feature.Styles.Add(new Mapsui.Styles.LabelStyle { Text = "Default Label",
+                BackColor = new Mapsui.Styles.Brush(Mapsui.Styles.Color.Transparent),
+                ForeColor = Mapsui.Styles.Color.White,
+                Halo = new Mapsui.Styles.Pen(Mapsui.Styles.Color.Black, 2)
+            });
             return feature;
+        }
+
+        private static Mapsui.Geometries.Point GgaToPoint(Gga gga) {
+            return SphericalMercator.FromLonLat(gga.Longitude, gga.Latitude);
         }
 
         private void Window_Closed(object sender, EventArgs e)

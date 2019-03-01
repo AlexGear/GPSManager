@@ -41,7 +41,8 @@ namespace GPSManager
 
         public static bool TryParse(string s, out Gga gga)
         {
-            if (!s.StartsWith("$GPGGA") && !s.StartsWith("$GNGGA") ||
+            if (string.IsNullOrEmpty(s) ||
+                !s.StartsWith("$GPGGA") && !s.StartsWith("$GNGGA") ||
                 !SplitChecksum(s, out var mainPart, out var checksumPart) ||
                 !ValidateChecksum(mainPart, checksumPart) ||
                 !SplitMainPart(s, out var subparts))

@@ -7,30 +7,30 @@ using System.Threading.Tasks;
 
 namespace GPSManager
 {
-    class GGA
+    class Gga
     {
         private enum CoordinateKind { Latitude, Longitude }
 
-        private const int GGACommaPartsNum = 15;
+        private const int GgaCommaPartsNum = 15;
 
         public bool IsDetermined { get; private set; }
         public readonly double Latitude;
         public readonly double Longitude;
         
-        public GGA()
+        public Gga()
         {
             Latitude = 0;
             Longitude = 0;
         }
 
-        public GGA(double Latitude, double Longitude)
+        public Gga(double Latitude, double Longitude)
         {
             this.Latitude = Latitude;
             this.Longitude = Longitude;
             IsDetermined = true;
         }
 
-        public static GGA Parse(string s)
+        public static Gga Parse(string s)
         {
             if(!TryParse(s, out var gga))
             {
@@ -39,21 +39,21 @@ namespace GPSManager
             return gga;
         }
 
-        public static bool TryParse(string s, out GGA gga)
+        public static bool TryParse(string s, out Gga gga)
         {
             if (!s.StartsWith("$GPGGA") && !s.StartsWith("$GNGGA") ||
                 !SplitChecksum(s, out var mainPart, out var checksumPart) ||
                 !ValidateChecksum(mainPart, checksumPart) ||
                 !SplitMainPart(s, out var subparts))
             {
-                gga = default(GGA);
+                gga = default(Gga);
                 return false;
             }
 
             string positionFixIndicator = subparts[6];
             if(positionFixIndicator == "0")
             {
-                gga = new GGA { IsDetermined = false };
+                gga = new Gga { IsDetermined = false };
                 return true;
             }
 
@@ -65,11 +65,11 @@ namespace GPSManager
             }
             catch
             {
-                gga = default(GGA);
+                gga = default(Gga);
                 return false;
             }
 
-            gga = new GGA(latitude, longitude);
+            gga = new Gga(latitude, longitude);
             return true;
         }
 
@@ -109,7 +109,7 @@ namespace GPSManager
         private static bool SplitMainPart(string s, out string[] subparts)
         {
             subparts = s.Split(',');
-            return subparts.Length == GGACommaPartsNum;
+            return subparts.Length == GgaCommaPartsNum;
         }
 
         private static double ParseCoordinate(string s, string letter, CoordinateKind kind)

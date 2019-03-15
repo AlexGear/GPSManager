@@ -20,6 +20,7 @@ namespace GPSManager
         private Features features;
 
         private bool isInDrawingMode;
+        private System.Windows.Point mouseDownPos;
         private Polygon currentPolygon;
         private Feature currentPolygonFeature;
         private Point previewPoint;
@@ -29,6 +30,7 @@ namespace GPSManager
         {
             this.mapControl = mapControl;
             this.mapControl.MouseDown += OnMouseDown;
+            this.mapControl.MouseUp += OnMouseUp;
             this.mapControl.MouseMove += OnMouseMove;
 
             features = new Features();
@@ -55,6 +57,26 @@ namespace GPSManager
 
         private void OnMouseDown(object sender, MouseButtonEventArgs e)
         {
+            if(!isInDrawingMode)
+            {
+                return;
+            }
+            mouseDownPos = e.GetPosition(mapControl);
+        }
+
+        private void OnMouseUp(object sender, MouseButtonEventArgs e)
+        {
+            if(!isInDrawingMode)
+            {
+                return;
+            }
+            const double tolerance = 5;
+            var pos = e.GetPosition(mapControl);
+            if (Math.Abs(pos.X - mouseDownPos.X) > tolerance ||
+                Math.Abs(pos.Y - mouseDownPos.Y) > tolerance)
+            {
+                return;
+            }
             // previewPoint is already in currentPolygon.
             // Setting it null makes OnMouseMove not remove it from currentPolygon
             // thus it stays persistently
@@ -121,14 +143,16 @@ namespace GPSManager
             mapControl.Cursor = Cursors.Pen;
         }
 
-        public void EndDrawing()
+        public Polygon EndDrawing()
         {
             if(!isInDrawingMode)
             {
-                return;
+                return null;
             }
 
             isInDrawingMode = false;
+            Polygon result = currentPolygon;
+
             mapControl.Cursor = Cursors.Arrow;
 
             if(currentPolygon != null)
@@ -152,6 +176,8 @@ namespace GPSManager
             currentPolygonFeature = null;
             previewPoint = null;
             previewPointFeature = null;
+
+            return result;
         }
     }
 }

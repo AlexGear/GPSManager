@@ -33,14 +33,17 @@ namespace GPSManager
         private static readonly SolidColorBrush ConnectedBrush = new SolidColorBrush(Color.FromRgb(21, 228, 30));
         private const string ConnectedStatusText = "Подключен";
         private const string DisconnectedStatusText = "Нет подключения";
-
+        private const string PinResourcePath = "GPSManager.Resources.Pin.png";
         private IGgaProvider ggaProvider;
         private ILayer oldLayer;
         private bool ggaProvidedFirstTime = true;
 
+        private Mapsui.Styles.IStyle pointStyle;
+
         public MainWindow()
         {
             InitializeComponent();
+            pointStyle = CreatePointStyle(scale: 0.8);
             InitializeMapControl();
             OnGgaProviderDisconnected();
         }
@@ -50,37 +53,69 @@ namespace GPSManager
             mapControl.Map.Layers.Add(OpenStreetMap.CreateTileLayer());
         }
 
-        class Placeholder : IConnectable, IGgaProvider
+        private static Mapsui.Styles.IStyle CreatePointStyle(double scale)
         {
-            public bool IsConnected => true;
-
-            public event Action Connected;
-            public event Action Disconnected;
-            public event Action<Gga> GgaProvided;
-
-            public Placeholder()
+            try
             {
-                F();
+                var bitmapId = GetBitmapIdForEmbeddedResource(PinResourcePath);
+                return new Mapsui.Styles.SymbolStyle
+                {
+                    BitmapId = bitmapId,
+                    SymbolType = Mapsui.Styles.SymbolType.Bitmap,
+                    SymbolScale = scale,
+                    SymbolOffset = new Mapsui.Styles.Offset(0.0, 0.5, true)
+                };
             }
-
-            async void F()
+            catch (Exception e)
             {
-                await Task.Delay(2000);
-                Connected?.Invoke();
-                GgaProvided?.Invoke(new Gga(55.046307, 82.963026));
-                await Task.Delay(4000);
-                Disconnected?.Invoke();
-            }
-
-            public void Dispose()
-            {
-                
+                MessageBox.Show(e.ToString(), "Resource loading failure", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return new Mapsui.Styles.LabelStyle
+                {
+                    BackColor = new Mapsui.Styles.Brush(Mapsui.Styles.Color.Transparent),
+                    ForeColor = Mapsui.Styles.Color.White,
+                };
             }
         }
 
+        private static int GetBitmapIdForEmbeddedResource(string imagePath)
+        {
+            var assembly = typeof(MainWindow).Assembly;
+            var image = assembly.GetManifestResourceStream(imagePath);
+            return Mapsui.Styles.BitmapRegistry.Instance.Register(image);
+        }
+
+        //class Placeholder : IConnectable, IGgaProvider
+        //{
+        //    public bool IsConnected => true;
+
+        //    public event Action Connected;
+        //    public event Action Disconnected;
+        //    public event Action<Gga> GgaProvided;
+
+        //    public Placeholder()
+        //    {
+        //        F();
+        //    }
+
+        //    async void F()
+        //    {
+        //        await Task.Delay(2000);
+        //        Connected?.Invoke();
+        //        GgaProvided?.Invoke(new Gga(55.046307, 82.963026));
+        //        await Task.Delay(4000);
+        //        Disconnected?.Invoke();
+        //    }
+
+        //    public void Dispose()
+        //    {
+
+        //    }
+        //}
+
         private void OnWindowLoaded(object sender, System.Windows.RoutedEventArgs e)
         {
-            var tcpGgaProvider = new Placeholder();//new TcpGgaProvider(Host, Port);
+            //var tcpGgaProvider = new Placeholder();
+            var tcpGgaProvider = new TcpGgaProvider(Host, Port);
 
             ggaProvider = tcpGgaProvider;
             ggaProvider.GgaProvided += OnGgaProvided;
@@ -123,7 +158,7 @@ namespace GPSManager
             connectStatusLabel.Content = DisconnectedStatusText;
         }
 
-        private static ILayer CreateLayer(Gga gga)
+        private ILayer CreateLayer(Gga gga)
         {
             var features = new Features
             {
@@ -131,17 +166,21 @@ namespace GPSManager
             };
 
             var memoryProvider = new MemoryProvider(features);
-            return new MemoryLayer { Name = "Points with labels", DataSource = memoryProvider };
+            return new MemoryLayer
+            {
+                Name = "Points",
+                DataSource = memoryProvider,
+                Style = null
+            };
         }
 
-        private static Feature CreatePoint(Gga gga)
+        private Feature CreatePoint(Gga gga)
         {
-            var feature = new Feature { Geometry = GgaToPoint(gga) };
-            feature.Styles.Add(new Mapsui.Styles.LabelStyle { Text = "Default Label",
-                BackColor = new Mapsui.Styles.Brush(Mapsui.Styles.Color.Transparent),
-                ForeColor = Mapsui.Styles.Color.White,
-                Halo = new Mapsui.Styles.Pen(Mapsui.Styles.Color.Black, 2)
-            });
+            var feature = new Feature
+            {
+                Geometry = GgaToPoint(gga)
+            };
+            feature.Styles.Add(pointStyle);
             return feature;
         }
 

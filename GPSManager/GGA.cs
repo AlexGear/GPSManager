@@ -139,5 +139,11 @@ namespace GPSManager
         {
             return SphericalMercator.FromLonLat(gga.Longitude, gga.Latitude);
         }
+
+        public static Gga FromMapsuiPoint(Point point)
+        {
+            Point lonLat = SphericalMercator.ToLonLat(point.X, point.Y);
+            return new Gga(Longitude: lonLat.X, Latitude: lonLat.Y);
+        }
     }
 }

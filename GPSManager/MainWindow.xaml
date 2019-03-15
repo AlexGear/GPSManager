@@ -5,18 +5,24 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:xaml="clr-namespace:Mapsui.UI.Wpf;assembly=Mapsui.UI.Wpf"
         mc:Ignorable="d"
-        Title="MainWindow" Height="522" Width="872" Closed="Window_Closed" Loaded="OnWindowLoaded">
+        Title="MainWindow" Height="453" Width="805" Closed="Window_Closed" Loaded="OnWindowLoaded">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="25"/>
-            <ColumnDefinition/>
+            <ColumnDefinition Width="798*"/>
+            <ColumnDefinition Width="32"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition/>
             <RowDefinition Height="25"/>
         </Grid.RowDefinitions>
-        <xaml:MapControl Name="mapControl" Grid.ColumnSpan="2" Margin="0" Grid.RowSpan="2"/>
+        <xaml:MapControl x:Name="mapControl" Grid.ColumnSpan="2" Margin="0" Grid.RowSpan="2"/>
         <Label x:Name="connectStatusLabel" Content="Label" Grid.Row="1" Grid.Column="1" VerticalContentAlignment="Stretch" Padding="5" Margin="0" HorizontalAlignment="Left"/>
         <Ellipse x:Name="connectStatusEllipse" Fill="#FF15E428" Grid.Row="1" Stroke="Black" Margin="5,6,5,4"/>
+        <StackPanel HorizontalAlignment="Left" Height="418" VerticalAlignment="Top" Width="32" Grid.Column="2" Grid.RowSpan="2">
+            <ToggleButton x:Name="polygonToolButton" BorderBrush="#FFB2B2B2" Margin="1,4,1,1" Height="32" Padding="1" Background="#FFEAEAEA" Checked="PolygonTool_Checked" Unchecked="PolygonTool_Unchecked">
+                <Image Source="Resources/PolygonTool.png" d:IsLocked="True"/>
+            </ToggleButton>
+        </StackPanel>
     </Grid>
 </Window>

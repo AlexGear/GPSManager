@@ -46,7 +46,7 @@ namespace GPSManager
             try
             {
                 var bitmapId = GetBitmapIdForEmbeddedResource(PinResourcePath);
-                return new Mapsui.Styles.SymbolStyle
+                return new SymbolStyle
                 {
                     BitmapId = bitmapId,
                     SymbolType = SymbolType.Bitmap,

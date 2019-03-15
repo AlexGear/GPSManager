@@ -35,7 +35,7 @@ namespace GPSManager
         private const string DisconnectedStatusText = "Нет подключения";
 
         private IGgaProvider ggaProvider;
-        private ILayer oldLayer;
+        private PolygonTool polygonTool;
 
         public MainWindow()
         {
@@ -73,11 +73,22 @@ namespace GPSManager
         //    }
         //}
 
+        protected override void OnKeyDown(KeyEventArgs e)
+        {
+            base.OnKeyDown(e);
+            if (e.Key == Key.Escape)
+            {
+                polygonToolButton.IsChecked = false;
+            };
+        }
+
         private void OnWindowLoaded(object sender, System.Windows.RoutedEventArgs e)
         {
             InitializeGgaProvieder();
             InitializeMapControl();
+            polygonTool = new PolygonTool(mapControl);
         }
+
         private void InitializeGgaProvieder()
         {
             //var tcpGgaProvider = new Placeholder();
@@ -119,6 +130,16 @@ namespace GPSManager
         {
             connectStatusEllipse.Fill = DisconnectedBrush;
             connectStatusLabel.Content = DisconnectedStatusText;
+        }
+
+        private void PolygonTool_Checked(object sender, RoutedEventArgs e)
+        {
+            polygonTool.BeginDrawing();
+        }
+
+        private void PolygonTool_Unchecked(object sender, RoutedEventArgs e)
+        {
+            polygonTool.EndDrawing();
         }
 
         private void Window_Closed(object sender, EventArgs e)

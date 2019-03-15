@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Mapsui.Geometries;
+using Mapsui.Projection;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -131,6 +133,11 @@ namespace GPSManager
             }
 
             return degrees;
+        }
+
+        public static Point ToMapsuiPoint(Gga gga)
+        {
+            return SphericalMercator.FromLonLat(gga.Longitude, gga.Latitude);
         }
     }
 }

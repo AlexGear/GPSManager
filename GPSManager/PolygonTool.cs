@@ -143,7 +143,7 @@ namespace GPSManager
             mapControl.Cursor = Cursors.Pen;
         }
 
-        public Polygon EndDrawing()
+        public IEnumerable<Gga> EndDrawing()
         {
             if(!isInDrawingMode)
             {
@@ -177,7 +177,7 @@ namespace GPSManager
             previewPoint = null;
             previewPointFeature = null;
 
-            return result;
+            return result.ExteriorRing.Vertices.Select(Gga.FromMapsuiPoint);
         }
     }
 }

@@ -45,33 +45,33 @@ namespace GPSManager
             connectStatusLabel.Content = DisconnectedStatusText;
         }
 
-        //class Placeholder : IConnectable, IGgaProvider
-        //{
-        //    public bool IsConnected => true;
+        class Placeholder : IConnectable, IGgaProvider
+        {
+            public bool IsConnected => true;
 
-        //    public event Action Connected;
-        //    public event Action Disconnected;
-        //    public event Action<Gga> GgaProvided;
+            public event Action Connected;
+            public event Action Disconnected;
+            public event Action<Gga> GgaProvided;
 
-        //    public Placeholder()
-        //    {
-        //        F();
-        //    }
+            public Placeholder()
+            {
+                F();
+            }
 
-        //    async void F()
-        //    {
-        //        await Task.Delay(2000);
-        //        Connected?.Invoke();
-        //        GgaProvided?.Invoke(new Gga(55.046307, 82.963026));
-        //        await Task.Delay(4000);
-        //        Disconnected?.Invoke();
-        //    }
+            async void F()
+            {
+                await Task.Delay(2000);
+                Connected?.Invoke();
+                GgaProvided?.Invoke(new Gga(55.046307, 82.963026));
+                await Task.Delay(4000);
+                Disconnected?.Invoke();
+            }
 
-        //    public void Dispose()
-        //    {
+            public void Dispose()
+            {
 
-        //    }
-        //}
+            }
+        }
 
         protected override void OnKeyDown(KeyEventArgs e)
         {
@@ -91,8 +91,8 @@ namespace GPSManager
 
         private void InitializeGgaProvieder()
         {
-            //var tcpGgaProvider = new Placeholder();
-            var tcpGgaProvider = new TcpGgaProvider(Host, Port);
+            var tcpGgaProvider = new Placeholder();
+            //var tcpGgaProvider = new TcpGgaProvider(Host, Port);
 
             ggaProvider = tcpGgaProvider;
             ggaProvider.GgaProvided += OnGgaProvided;
@@ -105,6 +105,7 @@ namespace GPSManager
         {
             mapControl.Map.Layers.Add(OpenStreetMap.CreateTileLayer());
             mapControl.Map.Layers.Add(new CurrentLocationLayer(ggaProvider));
+            mapControl.MouseRightButtonDown += (s, e) => polygonToolButton.IsChecked = false;
         }
 
         private void OnGgaProvided(Gga gga)
@@ -139,7 +140,8 @@ namespace GPSManager
 
         private void PolygonTool_Unchecked(object sender, RoutedEventArgs e)
         {
-            polygonTool.EndDrawing();
+            var polygon = polygonTool.EndDrawing();
+            Console.WriteLine(string.Join(", ", polygon));
         }
 
         private void Window_Closed(object sender, EventArgs e)

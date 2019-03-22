@@ -68,14 +68,11 @@ namespace GPSManager
             {
                 return;
             }
-
-            bool updateProvider = false;
-
+            
             if (currentPolygon == null)
             {
                 currentPolygon = new Polygon();
                 polygonLayer.Add(currentPolygon);
-                updateProvider = true;
             }
             if (previewPoint != null)
             {
@@ -87,11 +84,10 @@ namespace GPSManager
             if (previewPointFeature == null)
             {
                 polygonLayer.Add(previewPointFeature = new Feature { Geometry = previewPoint });
-                updateProvider = true;
             }
             previewPointFeature.Geometry = previewPoint;
 
-            Update(updateProvider);
+            Update();
         }
 
         private Mapsui.Geometries.Point GetGlobalPointFromEvent(MouseEventArgs e)
@@ -101,7 +97,7 @@ namespace GPSManager
             return globalPosition;
         }
 
-        private void Update(bool updateProvider = false)
+        private void Update()
         {
             polygonLayer.ViewChanged(true, polygonLayer.Envelope, resolution: 1);
         }
@@ -145,7 +141,7 @@ namespace GPSManager
             {
                 polygonLayer.TryRemove(previewPointFeature);
             }
-            Update(true);
+            Update();
 
             currentPolygon = null;
             previewPoint = null;

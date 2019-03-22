@@ -82,8 +82,8 @@ namespace GPSManager
             base.OnKeyDown(e);
             if (e.Key == Key.Escape)
             {
-                polygonToolButton.IsChecked = false;
-            };
+                EndPolygonDrawing();
+            }
         }
 
         private void OnWindowLoaded(object sender, System.Windows.RoutedEventArgs e)
@@ -114,13 +114,8 @@ namespace GPSManager
             mapControl.Map.Layers.Add(polygonLayer);
             mapControl.Map.InfoLayers.Add(polygonLayer);
 
+            mapControl.MouseLeftButtonDown += OnMapLeftClick;
             mapControl.MouseRightButtonDown += OnMapRightClick;
-        }
-
-        private void OnMapRightClick(object sender, MouseButtonEventArgs e)
-        {
-            polygonToolButton.IsChecked = false;
-            var info = mapControl.GetMapInfo(e.GetPosition(mapControl).ToMapsui());
         }
 
         private void OnGgaProvided(Gga gga)
@@ -155,8 +150,52 @@ namespace GPSManager
 
         private void PolygonTool_Unchecked(object sender, RoutedEventArgs e)
         {
-            var polygon = polygonTool.EndDrawing();
-            Console.WriteLine(string.Join(", ", polygon));
+            EndPolygonDrawing();
+        }
+        
+        private Polygon EndPolygonDrawing()
+        {
+            if(polygonTool.IsInDrawingMode)
+            {
+                var polygon = polygonTool.EndDrawing();
+                return polygon;
+            }
+            return null;
+        }
+
+        private void OnMapRightClick(object sender, MouseButtonEventArgs e)
+        {
+            UnhighlightAllPolygons();
+
+            bool wasntDrawing = EndPolygonDrawing() == null;
+            if (wasntDrawing)
+            {
+                var info = mapControl.GetMapInfo(e.GetPosition(mapControl).ToMapsui());
+                if (info.Feature is Polygon polygon)
+                {
+                    OnPolygonRightClick(polygon);
+                }
+            }
+        }
+
+        private void OnMapLeftClick(object sender, MouseButtonEventArgs e)
+        {
+            UnhighlightAllPolygons();
+        }
+
+        private void OnPolygonRightClick(Polygon polygon)
+        {
+            polygon.IsHighlighed = true;
+            polygonLayer.ViewChanged(true, polygonLayer.Envelope, resolution: 1);
+        }
+
+        private void UnhighlightAllPolygons()
+        {
+            foreach (var polygon in polygonLayer.GetFeatures().OfType<Polygon>())
+            {
+                polygon.IsHighlighed = false;
+            }
+            polygonLayer.ViewChanged(true, polygonLayer.Envelope, resolution: 1);
         }
 
         private void Window_Closed(object sender, EventArgs e)

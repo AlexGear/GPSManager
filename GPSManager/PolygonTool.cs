@@ -16,8 +16,8 @@ namespace GPSManager
     class PolygonTool
     {
         private MapControl mapControl;
-        private MemoryLayer mapLayer;
-        private Features features;
+        private WritableLayer layer;
+        //private Features features;
 
         private System.Windows.Point mouseDownPos;
         private Polygon currentPolygon;
@@ -33,22 +33,20 @@ namespace GPSManager
             this.mapControl.MouseLeftButtonDown += OnLeftMouseDown;
             this.mapControl.MouseLeftButtonUp += OnLeftMouseUp;
             this.mapControl.MouseMove += OnMouseMove;
-
-            features = new Features();
-            mapLayer = new MemoryLayer
+            
+            layer = new WritableLayer
             {
                 Name = "Polygons",
                 Style = CreateLayerStyle()
             };
-            this.mapControl.Map.Layers.Add(mapLayer);
+            this.mapControl.Map.Layers.Add(layer);
+            this.mapControl.Map.InfoLayers.Add(layer);
+            this.mapControl.Map.Info += OnMapInfo;
         }
 
-        private void OnFeatureInfo(object sender, Mapsui.UI.FeatureInfoEventArgs e)
+        private void OnMapInfo(object sender, Mapsui.UI.MapInfoEventArgs e)
         {
-            foreach(var pair in e.FeatureInfo)
-            {
-                Console.WriteLine($"{pair.Key} = {pair.Value}");
-            }
+            var f = e.MapInfo.Feature;
         }
 
         private IStyle CreateLayerStyle()
@@ -68,11 +66,6 @@ namespace GPSManager
         {
             if(!IsInDrawingMode)
             {
-                if(e.RightButton == MouseButtonState.Pressed)
-                {
-                    var info = mapControl.GetMapInfo(e.GetPosition(mapControl).ToMapsui());
-                    // TODO: show context menu
-                }
                 return;
             }
             mouseDownPos = e.GetPosition(mapControl);
@@ -109,7 +102,7 @@ namespace GPSManager
             if(currentPolygon == null)
             {
                 currentPolygon = new Polygon();
-                features.Add(currentPolygonFeature = new Feature { Geometry = currentPolygon });
+                layer.Add(currentPolygonFeature = new Feature { Geometry = currentPolygon });
                 updateProvider = true;
             }
             var vertices = currentPolygon.ExteriorRing.Vertices;
@@ -122,7 +115,7 @@ namespace GPSManager
 
             if(previewPointFeature == null)
             {
-                features.Add(previewPointFeature = new Feature { Geometry = previewPoint });
+                layer.Add(previewPointFeature = new Feature { Geometry = previewPoint });
                 updateProvider = true;
             }
             previewPointFeature.Geometry = previewPoint;
@@ -139,11 +132,11 @@ namespace GPSManager
 
         private void Update(bool updateProvider = false)
         {
-            if (updateProvider)
+            /*if (updateProvider)
             {
                 mapLayer.DataSource = new MemoryProvider(features);
-            }
-            mapLayer.ViewChanged(true, mapLayer.Envelope, 1);
+            }*/
+            layer.ViewChanged(true, layer.Envelope, resolution: 1);
         }
 
         public void BeginDrawing()
@@ -177,12 +170,12 @@ namespace GPSManager
                 }
                 if(currentPolygon.ExteriorRing.Vertices.Count == 0)
                 {
-                    features.Delete(currentPolygonFeature);
+                    layer.TryRemove(currentPolygonFeature);
                 }
             }
             if(previewPointFeature != null)
             {
-                features.Delete(previewPointFeature);
+                layer.TryRemove(previewPointFeature);
             }
             Update(true);
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -92,6 +93,17 @@ namespace GPSManager
             polygonLayer = new PolygonLayer();
             InitializeMapControl();
             polygonTool = new PolygonTool(mapControl, polygonLayer);
+
+            try
+            {
+                DB.Load();
+                polygonLayer.AddRange(DB.Polygons);
+            }
+            catch (SqlException ex)
+            {
+                MessageBox.Show("Ошибка загрузки базы данных:\n" + ex.ToString(), "Ошибка загрузки БД",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void InitializeGgaProvieder()
@@ -158,6 +170,11 @@ namespace GPSManager
             if(polygonTool.IsInDrawingMode)
             {
                 var polygon = polygonTool.EndDrawing();
+
+                polygonToolButton.IsChecked = false;
+
+                var id = DB.InsertPolygon(polygon);
+                Console.WriteLine(id);
                 return polygon;
             }
             return null;

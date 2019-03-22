@@ -71,7 +71,7 @@ namespace GPSManager
             
             if (currentPolygon == null)
             {
-                currentPolygon = new Polygon();
+                currentPolygon = new Polygon(new Mapsui.Geometries.Point[0]);
                 polygonLayer.Add(currentPolygon);
             }
             if (previewPoint != null)

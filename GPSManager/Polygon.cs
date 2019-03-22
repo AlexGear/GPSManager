@@ -17,9 +17,14 @@ namespace GPSManager
         private readonly MapsuiPolygon mapsuiPolygon;
         private bool isHighlighed;
 
+        public int ID { get; set; }
+        public string Name { get; set; }
+
         public IList<Point> Vertices => mapsuiPolygon.ExteriorRing.Vertices;
 
         public IEnumerable<Gga> GgaVertices => Vertices.Select(Gga.FromMapsuiPoint);
+
+        public string GeometryText => mapsuiPolygon.AsText();
 
         public bool IsHighlighed
         {
@@ -41,21 +46,42 @@ namespace GPSManager
                     Styles.Remove(highlightedStyle);
                 }
             }
-        }        
-
-        public Polygon()
-        {
-            Geometry = mapsuiPolygon = new MapsuiPolygon();
         }
 
-        public Polygon(IEnumerable<Point> vertices)
+        public Polygon(IEnumerable<Point> vertices, int id = 0, string name = null)
+            : this(new MapsuiPolygon(new LinearRing(vertices)), id, name)
         {
-            Geometry = mapsuiPolygon = new MapsuiPolygon(new LinearRing(vertices));
         }
 
-        public Polygon(IEnumerable<Gga> ggaVertices)
-            : this(ggaVertices.Select(Gga.ToMapsuiPoint))
+        private Polygon(MapsuiPolygon mapsuiPolygon, int id, string name)
         {
+            ID = id;
+            Name = name;
+            Geometry = this.mapsuiPolygon = mapsuiPolygon;
+        }
+
+        public static Polygon FromGeomText(string geometryText, int id = 0, string name = null)
+        {
+            if (string.IsNullOrWhiteSpace(geometryText))
+            {
+                throw new ArgumentException("geometryText is null or blank");
+            }
+            try
+            {
+                var geometry = Mapsui.Geometries.Geometry.GeomFromText(geometryText) as MapsuiPolygon;
+                if (geometry is MapsuiPolygon mp)
+                {
+                    return new Polygon(mp, id, name);
+                }
+                else
+                {
+                    throw new ArgumentException($"Geometry text is invalid: {geometryText}", nameof(geometryText));
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new ArgumentException($"Geometry text is invalid: {geometryText}", nameof(geometryText), ex);
+            }
         }
 
         private static VectorStyle CreateHighlighedStyle()

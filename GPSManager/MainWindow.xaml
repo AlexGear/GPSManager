@@ -16,7 +16,11 @@
             <RowDefinition/>
             <RowDefinition Height="25"/>
         </Grid.RowDefinitions>
-        <xaml:MapControl x:Name="mapControl" Grid.ColumnSpan="2" Margin="0" Grid.RowSpan="2"/>
+        <xaml:MapControl x:Name="mapControl" Grid.ColumnSpan="2" Margin="0" Grid.RowSpan="2">
+            <xaml:MapControl.ContextMenu>
+                <ContextMenu/>
+            </xaml:MapControl.ContextMenu>
+        </xaml:MapControl>
         <Label x:Name="connectStatusLabel" Content="Label" Grid.Row="1" Grid.Column="1" VerticalContentAlignment="Stretch" Padding="5" Margin="0" HorizontalAlignment="Left"/>
         <Ellipse x:Name="connectStatusEllipse" Fill="#FF15E428" Grid.Row="1" Stroke="Black" Margin="5,6,5,4"/>
         <StackPanel HorizontalAlignment="Left" Height="418" VerticalAlignment="Top" Width="32" Grid.Column="2" Grid.RowSpan="2">

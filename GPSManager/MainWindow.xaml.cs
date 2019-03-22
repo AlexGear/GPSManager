@@ -130,6 +130,22 @@ namespace GPSManager
             mapControl.MouseRightButtonDown += OnMapRightClick;
         }
 
+        private ContextMenu CreatePolygonContextMenu(Polygon polygon)
+        {
+            var contextMenu = new ContextMenu();
+            var removeButton = new MenuItem { Header = "Удалить полигон" };
+            removeButton.Click += (s, e) =>
+            {
+                if (DB.RemovePolygon(polygon))
+                {
+                    polygonLayer.TryRemove(polygon);
+                    polygonLayer.ViewChanged(true, polygonLayer.Envelope, resolution: 1);
+                }
+            };
+            contextMenu.Items.Add(removeButton);
+            return contextMenu;
+        }
+
         private void OnGgaProvided(Gga gga)
         {
             ggaProvider.GgaProvided -= OnGgaProvided;
@@ -172,9 +188,21 @@ namespace GPSManager
                 var polygon = polygonTool.EndDrawing();
 
                 polygonToolButton.IsChecked = false;
-
-                var id = DB.InsertPolygon(polygon);
-                Console.WriteLine(id);
+                
+                if(polygon != null)
+                {
+                    try
+                    {
+                        DB.InsertPolygonAndAssingID(polygon);
+                    }
+                    catch(SqlException ex)
+                    {
+                        MessageBox.Show("Ошибка при добавлении записи в базу данных:\n" + ex.ToString(), 
+                            "Ошибка добавления в БД",
+                            MessageBoxButton.OK, 
+                            MessageBoxImage.Error);
+                    }
+                }
                 return polygon;
             }
             return null;
@@ -204,6 +232,9 @@ namespace GPSManager
         {
             polygon.IsHighlighed = true;
             polygonLayer.ViewChanged(true, polygonLayer.Envelope, resolution: 1);
+
+            var contextMenu = CreatePolygonContextMenu(polygon);
+            contextMenu.IsOpen = true;
         }
 
         private void UnhighlightAllPolygons()

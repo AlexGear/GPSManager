@@ -34,8 +34,12 @@ namespace GPSManager
         /// </summary>
         /// <param name="polygon"></param>
         /// <returns></returns>
-        public static int InsertPolygon(Polygon polygon)
+        public static int InsertPolygonAndAssingID(Polygon polygon)
         {
+            if(polygon == null)
+            {
+                throw new ArgumentNullException(nameof(polygon));
+            }
             using (var connection = OpenConnection())
             using (var command = connection.CreateCommand())
             {
@@ -44,8 +48,30 @@ namespace GPSManager
                 command.Parameters.AddWithValue("@name", polygon.Name ?? "");
                 command.Parameters.AddWithValue("@geometry", polygon.GeometryText);
                 var id = (int)(decimal)command.ExecuteScalar();
+                polygon.ID = id;
                 polygons.Add(polygon);
                 return id;
+            }
+        }
+
+        public static bool RemovePolygon(Polygon polygon)
+        {
+            if(polygon == null)
+            {
+                throw new ArgumentNullException(nameof(polygon));
+            }
+            using (var connection = OpenConnection())
+            using (var command = connection.CreateCommand())
+            {
+                int id = polygon.ID;
+                command.CommandText = "DELETE FROM POLYGONS WHERE ID = @id";
+                command.Parameters.AddWithValue("@id", id);
+                bool removed = 1 == command.ExecuteNonQuery();
+                if(removed)
+                {
+                    polygons.Remove(polygon);
+                }
+                return removed;
             }
         }
 

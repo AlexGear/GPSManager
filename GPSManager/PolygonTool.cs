@@ -19,18 +19,19 @@ namespace GPSManager
         private MemoryLayer mapLayer;
         private Features features;
 
-        private bool isInDrawingMode;
         private System.Windows.Point mouseDownPos;
         private Polygon currentPolygon;
         private Feature currentPolygonFeature;
         private Point previewPoint;
         private Feature previewPointFeature;
 
+        public bool IsInDrawingMode { get; private set; }
+
         public PolygonTool(MapControl mapControl)
         {
             this.mapControl = mapControl;
-            this.mapControl.MouseDown += OnMouseDown;
-            this.mapControl.MouseUp += OnMouseUp;
+            this.mapControl.MouseLeftButtonDown += OnLeftMouseDown;
+            this.mapControl.MouseLeftButtonUp += OnLeftMouseUp;
             this.mapControl.MouseMove += OnMouseMove;
 
             features = new Features();
@@ -40,6 +41,14 @@ namespace GPSManager
                 Style = CreateLayerStyle()
             };
             this.mapControl.Map.Layers.Add(mapLayer);
+        }
+
+        private void OnFeatureInfo(object sender, Mapsui.UI.FeatureInfoEventArgs e)
+        {
+            foreach(var pair in e.FeatureInfo)
+            {
+                Console.WriteLine($"{pair.Key} = {pair.Value}");
+            }
         }
 
         private IStyle CreateLayerStyle()
@@ -55,18 +64,23 @@ namespace GPSManager
             };
         }
 
-        private void OnMouseDown(object sender, MouseButtonEventArgs e)
+        private void OnLeftMouseDown(object sender, MouseButtonEventArgs e)
         {
-            if(!isInDrawingMode)
+            if(!IsInDrawingMode)
             {
+                if(e.RightButton == MouseButtonState.Pressed)
+                {
+                    var info = mapControl.GetMapInfo(e.GetPosition(mapControl).ToMapsui());
+                    // TODO: show context menu
+                }
                 return;
             }
             mouseDownPos = e.GetPosition(mapControl);
         }
 
-        private void OnMouseUp(object sender, MouseButtonEventArgs e)
+        private void OnLeftMouseUp(object sender, MouseButtonEventArgs e)
         {
-            if(!isInDrawingMode)
+            if(!IsInDrawingMode)
             {
                 return;
             }
@@ -85,7 +99,7 @@ namespace GPSManager
 
         private void OnMouseMove(object sender, MouseEventArgs e)
         {
-            if(!isInDrawingMode)
+            if(!IsInDrawingMode)
             {
                 return;
             }
@@ -134,23 +148,23 @@ namespace GPSManager
 
         public void BeginDrawing()
         {
-            if (isInDrawingMode)
+            if (IsInDrawingMode)
             {
                 return;
             }
 
-            isInDrawingMode = true;
+            IsInDrawingMode = true;
             mapControl.Cursor = Cursors.Pen;
         }
 
         public IEnumerable<Gga> EndDrawing()
         {
-            if(!isInDrawingMode)
+            if(!IsInDrawingMode)
             {
                 return null;
             }
 
-            isInDrawingMode = false;
+            IsInDrawingMode = false;
             Polygon result = currentPolygon;
 
             mapControl.Cursor = Cursors.Arrow;

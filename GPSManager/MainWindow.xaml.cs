@@ -17,6 +17,7 @@ using Mapsui.Geometries;
 using Mapsui.Layers;
 using Mapsui.Projection;
 using Mapsui.Providers;
+using Mapsui.UI.Wpf;
 using Mapsui.Utilities;
 
 namespace GPSManager
@@ -35,6 +36,9 @@ namespace GPSManager
         private const string DisconnectedStatusText = "Нет подключения";
 
         private IGgaProvider ggaProvider;
+
+        private WritableLayer polygonLayer;
+
         private PolygonTool polygonTool;
 
         public MainWindow()
@@ -85,8 +89,9 @@ namespace GPSManager
         private void OnWindowLoaded(object sender, System.Windows.RoutedEventArgs e)
         {
             InitializeGgaProvieder();
+            polygonLayer = new PolygonLayer();
             InitializeMapControl();
-            polygonTool = new PolygonTool(mapControl);
+            polygonTool = new PolygonTool(mapControl, polygonLayer);
         }
 
         private void InitializeGgaProvieder()
@@ -105,7 +110,17 @@ namespace GPSManager
         {
             mapControl.Map.Layers.Add(OpenStreetMap.CreateTileLayer());
             mapControl.Map.Layers.Add(new CurrentLocationLayer(ggaProvider));
-            mapControl.MouseRightButtonDown += (s, e) => polygonToolButton.IsChecked = false;
+
+            mapControl.Map.Layers.Add(polygonLayer);
+            mapControl.Map.InfoLayers.Add(polygonLayer);
+
+            mapControl.MouseRightButtonDown += OnMapRightClick;
+        }
+
+        private void OnMapRightClick(object sender, MouseButtonEventArgs e)
+        {
+            polygonToolButton.IsChecked = false;
+            var info = mapControl.GetMapInfo(e.GetPosition(mapControl).ToMapsui());
         }
 
         private void OnGgaProvided(Gga gga)

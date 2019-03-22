@@ -96,6 +96,8 @@
     </ApplicationDefinition>
     <Compile Include="CurrentLocationLayer.cs" />
     <Compile Include="IConnectable.cs" />
+    <Compile Include="Polygon.cs" />
+    <Compile Include="PolygonLayer.cs" />
     <Compile Include="PolygonTool.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>

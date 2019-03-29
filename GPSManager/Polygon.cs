@@ -14,11 +14,22 @@ namespace GPSManager
     class Polygon : Feature
     {
         private static readonly IStyle highlightedStyle = CreateHighlighedStyle();
+
         private readonly MapsuiPolygon mapsuiPolygon;
+        private string name;
         private bool isHighlighed;
+        private LabelStyle labelStyle;
 
         public int ID { get; set; }
-        public string Name { get; set; }
+        public string Name
+        {
+            get => name;
+            set
+            {
+                name = value;
+                UpdateLabelStyle();
+            }
+        }
 
         public IList<Point> Vertices => mapsuiPolygon.ExteriorRing.Vertices;
 
@@ -106,6 +117,30 @@ namespace GPSManager
                     Width = 2
                 }
             };
+        }
+
+        private void UpdateLabelStyle()
+        {
+            if (!string.IsNullOrWhiteSpace(Name))
+            {
+                if (labelStyle == null)
+                {
+                    StylesList.Add(labelStyle = new LabelStyle());
+                }
+                labelStyle.Text = Name;
+            }
+            else
+            {
+                if (labelStyle != null)
+                {
+                    // Style.Equals() is not symmetric, i. e.
+                    // style1.Equals(style2) could return false whilst
+                    // style2.Equals(style1) could return true.
+                    // That causes bugs.
+                    StylesList.RemoveAll(s => ReferenceEquals(s, labelStyle));
+                    labelStyle = null;
+                }
+            }
         }
     }
 }

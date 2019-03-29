@@ -191,15 +191,22 @@ namespace GPSManager
                 
                 if(polygon != null)
                 {
+                    var nameDialog = new PolygonNameDialog();
+                    if(true == nameDialog.ShowDialog())
+                    {
+                        polygon.Name = nameDialog.PolygonName;
+                        RefreshLayer(polygonLayer);
+                    }
+
                     try
                     {
                         DB.InsertPolygonAndAssingID(polygon);
                     }
-                    catch(SqlException ex)
+                    catch (SqlException ex)
                     {
-                        MessageBox.Show("Ошибка при добавлении записи в базу данных:\n" + ex.ToString(), 
+                        MessageBox.Show("Ошибка при добавлении записи в базу данных:\n" + ex.ToString(),
                             "Ошибка добавления в БД",
-                            MessageBoxButton.OK, 
+                            MessageBoxButton.OK,
                             MessageBoxImage.Error);
                     }
                 }
@@ -231,7 +238,7 @@ namespace GPSManager
         private void OnPolygonRightClick(Polygon polygon)
         {
             polygon.IsHighlighed = true;
-            polygonLayer.ViewChanged(true, polygonLayer.Envelope, resolution: 1);
+            RefreshLayer(polygonLayer);
 
             var contextMenu = CreatePolygonContextMenu(polygon);
             contextMenu.IsOpen = true;
@@ -243,7 +250,12 @@ namespace GPSManager
             {
                 polygon.IsHighlighed = false;
             }
-            polygonLayer.ViewChanged(true, polygonLayer.Envelope, resolution: 1);
+            RefreshLayer(polygonLayer);
+        }
+
+        private void RefreshLayer(ILayer layer)
+        {
+            layer.ViewChanged(true, layer.Envelope, resolution: 1);
         }
 
         private void Window_Closed(object sender, EventArgs e)

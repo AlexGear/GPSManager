@@ -45,7 +45,7 @@ namespace GPSManager
         {
             try
             {
-                var bitmapId = GetBitmapIdForEmbeddedResource(PinResourcePath);
+                var bitmapId = BitmapResources.GetBitmapIdForEmbeddedResource(PinResourcePath);
                 return new SymbolStyle
                 {
                     BitmapId = bitmapId,
@@ -63,13 +63,6 @@ namespace GPSManager
                     ForeColor = Color.White
                 };
             }
-        }
-
-        private static int GetBitmapIdForEmbeddedResource(string imagePath)
-        {
-            var assembly = typeof(MainWindow).Assembly;
-            var image = assembly.GetManifestResourceStream(imagePath);
-            return BitmapRegistry.Instance.Register(image);
         }
     }
 }

@@ -94,10 +94,13 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="BitmapResources.cs" />
     <Compile Include="CurrentLocationLayer.cs" />
     <Compile Include="DB.cs" />
     <Compile Include="IConnectable.cs" />
+    <Compile Include="ILayerExtensions.cs" />
     <Compile Include="Polygon.cs" />
+    <Compile Include="PolygonEditing.cs" />
     <Compile Include="PolygonLayer.cs" />
     <Compile Include="PolygonNameDialog.xaml.cs">
       <DependentUpon>PolygonNameDialog.xaml</DependentUpon>
@@ -166,6 +169,14 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Rename.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Dragging.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Edit.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>

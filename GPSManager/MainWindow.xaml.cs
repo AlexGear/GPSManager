@@ -41,6 +41,7 @@ namespace GPSManager
         private WritableLayer polygonLayer;
 
         private PolygonTool polygonTool;
+        private PolygonEditing polygonEditing;
 
         public MainWindow()
         {
@@ -93,6 +94,7 @@ namespace GPSManager
             polygonLayer = new PolygonLayer();
             InitializeMapControl();
             polygonTool = new PolygonTool(mapControl, polygonLayer);
+            polygonEditing = new PolygonEditing(mapControl, polygonLayer);
 
             try
             {
@@ -133,43 +135,55 @@ namespace GPSManager
         private ContextMenu CreatePolygonContextMenu(Polygon polygon)
         {
             var contextMenu = new ContextMenu();
-            contextMenu.Items.Add(CreateRenameButton());
-            contextMenu.Items.Add(CreateRemoveButton());
-
+            contextMenu.Items.Add(CreateRenameItem());
+            contextMenu.Items.Add(CreateModifyItem());
+            contextMenu.Items.Add(CreateRemoveItem());
             return contextMenu;
 
             ///////// BUTTONS CREATION LOCAL FUNCS
-            MenuItem CreateRenameButton()
+            MenuItem CreateRenameItem()
             {
-                var button = new MenuItem
+                var item = new MenuItem
                 {
                     Header = "Переименовать",
                     Icon = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/Resources/Rename.png")) }
                 };
-                button.Click += (s, e) =>
+                item.Click += (s, e) =>
                 {
                     RenamePolygonDialog(polygon);
                     DB.UpdatePolygon(polygon);
                 };
-                return button;
+                return item;
             }
-
-            MenuItem CreateRemoveButton()
+            MenuItem CreateRemoveItem()
             {
-                var button = new MenuItem
+                var item = new MenuItem
                 {
                     Header = "Удалить полигон",
                     Icon = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/Resources/Delete.png")) }
                 };
-                button.Click += (s, e) =>
+                item.Click += (s, e) =>
                 {
                     if (DB.RemovePolygon(polygon))
                     {
                         polygonLayer.TryRemove(polygon);
-                        RefreshLayer(polygonLayer);
+                        polygonLayer.Refresh();
                     }
                 };
-                return button;
+                return item;
+            }
+            MenuItem CreateModifyItem()
+            {
+                var item = new MenuItem
+                {
+                    Header = "Редактировать",
+                    Icon = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/Resources/Edit.png")) }
+                };
+                item.Click += (s, e) =>
+                {
+                    polygonEditing.BeginEditing(polygon);
+                };
+                return item;
             }
             ///////// END BUTTONS CREATION LOCAL FUNCS
         }
@@ -201,6 +215,7 @@ namespace GPSManager
 
         private void PolygonTool_Checked(object sender, RoutedEventArgs e)
         {
+            polygonEditing.EndEditing();
             polygonTool.BeginDrawing();
         }
 
@@ -244,7 +259,7 @@ namespace GPSManager
             if (true == nameDialog.ShowDialog())
             {
                 polygon.Name = nameDialog.PolygonName;
-                RefreshLayer(polygonLayer);
+                polygonLayer.Refresh();
                 return true;
             }
             return false;
@@ -255,7 +270,8 @@ namespace GPSManager
             UnhighlightAllPolygons();
 
             bool wasntDrawing = EndPolygonDrawing() == null;
-            if (wasntDrawing)
+            bool wasntEditing = !polygonEditing.EndEditing();
+            if (wasntDrawing && wasntEditing)
             {
                 var clickScreenPos = e.GetPosition(mapControl).ToMapsui();
                 var clickWorldPos = mapControl.Map.Viewport.ScreenToWorld(clickScreenPos);
@@ -283,8 +299,8 @@ namespace GPSManager
                         {
                             Header = string.IsNullOrWhiteSpace(polygon.Name) ? "<безымянный полигон>" : polygon.Name
                         };
-                        item.GotFocus += (s, ee) => { polygon.IsHighlighted = true; RefreshLayer(polygonLayer); };
-                        item.LostFocus += (s, ee) => { polygon.IsHighlighted = false; RefreshLayer(polygonLayer); };
+                        item.GotFocus += (s, ee) => { polygon.IsHighlighted = true; polygonLayer.Refresh(); };
+                        item.LostFocus += (s, ee) => { polygon.IsHighlighted = false; polygonLayer.Refresh(); };
                         item.Click += (s, ee) => OnPolygonRightClick(polygon);
                         contextMenu.Items.Add(item);
                     }
@@ -295,7 +311,7 @@ namespace GPSManager
             IEnumerable<Polygon> GetPolygonsAt(Mapsui.Geometries.Point point)
             {
                 var boundingBox = new BoundingBox(point, point);
-                var polygons = polygonLayer.GetFeaturesInView(boundingBox, 0.1f).OfType<Polygon>();
+                var polygons = polygonLayer.GetFeaturesInView(boundingBox, resolution: 1f).OfType<Polygon>();
                 return polygons.Where(p => p.Geometry.Distance(point) <= 0);
             }
         }
@@ -308,7 +324,7 @@ namespace GPSManager
         private void OnPolygonRightClick(Polygon polygon)
         {
             polygon.IsHighlighted = true;
-            RefreshLayer(polygonLayer);
+            polygonLayer.Refresh();
 
             var contextMenu = CreatePolygonContextMenu(polygon);
             contextMenu.IsOpen = true;
@@ -320,17 +336,13 @@ namespace GPSManager
             {
                 polygon.IsHighlighted = false;
             }
-            RefreshLayer(polygonLayer);
-        }
-
-        private void RefreshLayer(ILayer layer)
-        {
-            layer.ViewChanged(true, layer.Envelope, resolution: 1);
+            polygonLayer.Refresh();
         }
 
         private void Window_Closed(object sender, EventArgs e)
         {
             ggaProvider?.Dispose();
+            polygonEditing.EndEditing();
         }
     }
 }

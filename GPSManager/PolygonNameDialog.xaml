@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:GPSManager"
         mc:Ignorable="d"
+        WindowStartupLocation="CenterScreen"
         Title="Присвоение имени полигону" Height="135.5" Width="403">
     <Grid FocusManager.FocusedElement="{Binding ElementName=nameTextBox}">
         <TextBlock Margin="10,10,0,0" TextWrapping="Wrap" Text="Имя полигона" VerticalAlignment="Top" HorizontalAlignment="Left"/>

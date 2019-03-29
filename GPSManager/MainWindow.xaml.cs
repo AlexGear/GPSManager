@@ -133,7 +133,12 @@ namespace GPSManager
         private ContextMenu CreatePolygonContextMenu(Polygon polygon)
         {
             var contextMenu = new ContextMenu();
-            var removeButton = new MenuItem { Header = "Удалить полигон" };
+            var removeButton = new MenuItem
+            {
+                Header = "Удалить полигон",
+                Icon = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/Resources/Delete.png")) },
+                
+            };
             removeButton.Click += (s, e) =>
             {
                 if (DB.RemovePolygon(polygon))

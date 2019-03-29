@@ -159,6 +159,11 @@
   <ItemGroup>
     <Resource Include="Resources\PolygonTool.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Delete.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="packages\SkiaSharp.1.59.3\build\net45\SkiaSharp.targets" Condition="Exists('packages\SkiaSharp.1.59.3\build\net45\SkiaSharp.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

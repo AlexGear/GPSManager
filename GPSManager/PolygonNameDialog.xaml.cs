@@ -21,9 +21,14 @@ namespace GPSManager
     {
         public string PolygonName { get; private set; }
 
-        public PolygonNameDialog()
+        public PolygonNameDialog(string initialName = null)
         {
             InitializeComponent();
+            if(!string.IsNullOrWhiteSpace(initialName))
+            {
+                PolygonName = initialName;
+                nameTextBox.Text = initialName;
+            }
         }
 
         private void OkButton_Click(object sender, RoutedEventArgs e)

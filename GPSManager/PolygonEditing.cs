@@ -14,19 +14,22 @@ namespace GPSManager
 {
     class PolygonEditing
     {
+        private const double VertexInsertionDistance = 10;
+
         private MapControl mapControl;
         private WritableLayer polygonLayer;
         private WritableLayer draggingPointsLayer;
         private Polygon editedPolygon;
         private DraggingFeature draggingFeature;
-        private Point draggingOffset; 
+        private Point draggingOffset;
+        private Feature insertionPreviewFeature;
 
         public PolygonEditing(MapControl mapControl, WritableLayer polygonLayer)
         {
             this.mapControl = mapControl;
             this.polygonLayer = polygonLayer;
 
-            draggingPointsLayer = new WritableLayer { Style = CreateLayerStyle(0.8f) };
+            draggingPointsLayer = new WritableLayer { Style = CreateDraggingLayerStyle(0.8f) };
             this.mapControl.Map.Layers.Add(draggingPointsLayer);
 
             this.mapControl.PreviewMouseLeftButtonDown += OnPreviewMouseDown;
@@ -87,14 +90,58 @@ namespace GPSManager
         }
 
         private void OnPreviewMouseMove(object sender, MouseEventArgs e)
-        {
-            if(draggingFeature != null)
+        {   
+            if (draggingFeature != null)
             {
                 Point mousePoint = ScreenPointToGlobal(e.GetPosition(mapControl).ToMapsui());
                 draggingFeature.Vertex = mousePoint - draggingOffset;
                 draggingPointsLayer.Refresh();
                 polygonLayer.Refresh();
             }
+            else if(editedPolygon != null)
+            {
+                Point mouseScreenPoint = e.GetPosition(mapControl).ToMapsui();
+                Point mouseWorldPoint = ScreenPointToGlobal(mouseScreenPoint);
+                double distance = Math.Abs(editedPolygon.Geometry.Distance(mouseWorldPoint));
+                double screenDistance = GlobalPointToScreen(mouseWorldPoint + new Point(distance, 0)).X - mouseScreenPoint.X;
+                if(screenDistance > VertexInsertionDistance)
+                {
+                    if(insertionPreviewFeature != null)
+                    {
+                        draggingPointsLayer.TryRemove(insertionPreviewFeature);
+                        insertionPreviewFeature = null;
+                    }
+                    return;
+                }
+
+                IList<Point> vertices = editedPolygon.Vertices;
+                Point prevVertex = vertices[vertices.Count - 1];
+                foreach(var vertex in vertices)
+                {
+                    Point perpendicularBase = GetPerpendicularBase(mouseWorldPoint, prevVertex, vertex);
+                    double perpendicularLength = mouseWorldPoint.Distance(perpendicularBase);
+                    bool isThisSegemntClosest = Math.Abs(perpendicularLength - distance) <= 0.1;
+                    if (isThisSegemntClosest)
+                    {
+                        if(insertionPreviewFeature == null)
+                        {
+                            insertionPreviewFeature = new Feature();
+                        }
+                        insertionPreviewFeature.Geometry = perpendicularBase;
+                        draggingPointsLayer.Add(insertionPreviewFeature);
+                    }
+                    prevVertex = vertex;
+                }
+            }
+        }
+
+        private static Point GetPerpendicularBase(Point m, Point a, Point b)
+        {
+            Point am = m - a;
+            Point bm = m - b;
+            Point bmNorm = bm * (1 / Math.Sqrt(bm.X * bm.X + bm.Y * bm.Y));
+            Point ah = bmNorm * (am.X * bmNorm.X + am.Y * bmNorm.Y);
+            return a + ah;
         }
 
         private void OnPreviewMouseUp(object sender, MouseButtonEventArgs e)
@@ -102,7 +149,7 @@ namespace GPSManager
             draggingFeature = null;
         }
 
-        private static IStyle CreateLayerStyle(double scale)
+        private static IStyle CreateDraggingLayerStyle(double scale)
         {
             return new SymbolStyle
             {
@@ -114,8 +161,12 @@ namespace GPSManager
 
         private Point ScreenPointToGlobal(Point screenPoint)
         {
-            var globalPosition = mapControl.Map.Viewport.ScreenToWorld(screenPoint);
-            return globalPosition;
+            return mapControl.Map.Viewport.ScreenToWorld(screenPoint);
+        }
+
+        private Point GlobalPointToScreen(Point worldPoint)
+        {
+            return mapControl.Map.Viewport.WorldToScreen(worldPoint);
         }
 
         private class DraggingFeature : Feature

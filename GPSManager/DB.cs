@@ -141,7 +141,7 @@ namespace GPSManager
             {
                 command.CommandText = $"UPDATE {PolygonsTable} SET " +
                     $"NAME = @name, GEOMETRY = @geometry WHERE ID = @id";
-                command.Parameters.AddWithValue("@name", polygon.Name);
+                command.Parameters.AddWithValue("@name", polygon.Name ?? "");
                 command.Parameters.AddWithValue("@geometry", polygon.GeometryText);
                 command.Parameters.AddWithValue("@id", polygon.ID);
                 bool updated = 1 == command.ExecuteNonQuery();

@@ -121,17 +121,6 @@ namespace GPSManager
                     }
                 }
             }
-            //using (var command = connection.CreateCommand())
-            //{
-            //    command.CommandText = $"SELECT id, name, geometry FROM {PolygonsTable}";
-            //    using (var reader = command.ExecuteReader())
-            //    {
-            //        while(reader.Read())
-            //        {
-
-            //        }
-            //    }
-            //}
         }
 
         private static Polygon GetPolygonFromRow(DataRow row)
@@ -139,6 +128,34 @@ namespace GPSManager
             return Polygon.FromGeomText(row.Field<string>("GEOMETRY"),
                                         row.Field<int>("ID"),
                                         row.Field<string>("NAME"));
+        }
+
+        public static bool UpdatePolygon(Polygon polygon)
+        {
+            if (polygon == null)
+            {
+                throw new ArgumentNullException(nameof(polygon));
+            }
+            using (var connection = OpenConnection())
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = $"UPDATE {PolygonsTable} SET " +
+                    $"NAME = @name, GEOMETRY = @geometry WHERE ID = @id";
+                command.Parameters.AddWithValue("@name", polygon.Name);
+                command.Parameters.AddWithValue("@geometry", polygon.GeometryText);
+                command.Parameters.AddWithValue("@id", polygon.ID);
+                bool updated = 1 == command.ExecuteNonQuery();
+                if (updated)
+                {
+                    var oldPolygonWithSameID = polygons.Find(p => p.ID == polygon.ID);
+                    if(oldPolygonWithSameID != polygon)
+                    {
+                        polygons.Remove(oldPolygonWithSameID);
+                        polygons.Add(polygon);
+                    }
+                }
+                return updated;
+            }
         }
     }
 }

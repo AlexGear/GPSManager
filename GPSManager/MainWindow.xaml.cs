@@ -133,22 +133,45 @@ namespace GPSManager
         private ContextMenu CreatePolygonContextMenu(Polygon polygon)
         {
             var contextMenu = new ContextMenu();
-            var removeButton = new MenuItem
-            {
-                Header = "Удалить полигон",
-                Icon = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/Resources/Delete.png")) },
-                
-            };
-            removeButton.Click += (s, e) =>
-            {
-                if (DB.RemovePolygon(polygon))
-                {
-                    polygonLayer.TryRemove(polygon);
-                    polygonLayer.ViewChanged(true, polygonLayer.Envelope, resolution: 1);
-                }
-            };
-            contextMenu.Items.Add(removeButton);
+            contextMenu.Items.Add(CreateRenameButton());
+            contextMenu.Items.Add(CreateRemoveButton());
+
             return contextMenu;
+
+            ///////// BUTTONS CREATION LOCAL FUNCS
+            MenuItem CreateRenameButton()
+            {
+                var button = new MenuItem
+                {
+                    Header = "Переименовать",
+                    Icon = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/Resources/Rename.png")) }
+                };
+                button.Click += (s, e) =>
+                {
+                    RenamePolygonDialog(polygon);
+                    DB.UpdatePolygon(polygon);
+                };
+                return button;
+            }
+
+            MenuItem CreateRemoveButton()
+            {
+                var button = new MenuItem
+                {
+                    Header = "Удалить полигон",
+                    Icon = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/Resources/Delete.png")) }
+                };
+                button.Click += (s, e) =>
+                {
+                    if (DB.RemovePolygon(polygon))
+                    {
+                        polygonLayer.TryRemove(polygon);
+                        polygonLayer.ViewChanged(true, polygonLayer.Envelope, resolution: 1);
+                    }
+                };
+                return button;
+            }
+            ///////// END BUTTONS CREATION LOCAL FUNCS
         }
 
         private void OnGgaProvided(Gga gga)
@@ -196,12 +219,7 @@ namespace GPSManager
                 
                 if(polygon != null)
                 {
-                    var nameDialog = new PolygonNameDialog();
-                    if(true == nameDialog.ShowDialog())
-                    {
-                        polygon.Name = nameDialog.PolygonName;
-                        RefreshLayer(polygonLayer);
-                    }
+                    RenamePolygonDialog(polygon);
 
                     try
                     {
@@ -218,6 +236,18 @@ namespace GPSManager
                 return polygon;
             }
             return null;
+        }
+
+        private bool RenamePolygonDialog(Polygon polygon)
+        {
+            var nameDialog = new PolygonNameDialog(polygon.Name);
+            if (true == nameDialog.ShowDialog())
+            {
+                polygon.Name = nameDialog.PolygonName;
+                RefreshLayer(polygonLayer);
+                return true;
+            }
+            return false;
         }
 
         private void OnMapRightClick(object sender, MouseButtonEventArgs e)

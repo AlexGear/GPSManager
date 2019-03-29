@@ -17,7 +17,7 @@ namespace GPSManager
 
         private readonly MapsuiPolygon mapsuiPolygon;
         private string name;
-        private bool isHighlighed;
+        private bool isHighlighted;
         private LabelStyle labelStyle;
 
         public int ID { get; set; }
@@ -37,15 +37,15 @@ namespace GPSManager
 
         public string GeometryText => mapsuiPolygon.AsText();
 
-        public bool IsHighlighed
+        public bool IsHighlighted
         {
-            get => isHighlighed;
+            get => isHighlighted;
             set
             {
-                if (value == isHighlighed) return;
+                if (value == isHighlighted) return;
 
-                isHighlighed = value;
-                if(isHighlighed)
+                isHighlighted = value;
+                if(isHighlighted)
                 {
                     // Style.Equals() is not symmetric, i. e.
                     // style1.Equals(style2) could return false whilst

@@ -166,7 +166,7 @@ namespace GPSManager
                     if (DB.RemovePolygon(polygon))
                     {
                         polygonLayer.TryRemove(polygon);
-                        polygonLayer.ViewChanged(true, polygonLayer.Envelope, resolution: 1);
+                        RefreshLayer(polygonLayer);
                     }
                 };
                 return button;
@@ -272,7 +272,7 @@ namespace GPSManager
 
         private void OnPolygonRightClick(Polygon polygon)
         {
-            polygon.IsHighlighed = true;
+            polygon.IsHighlighted = true;
             RefreshLayer(polygonLayer);
 
             var contextMenu = CreatePolygonContextMenu(polygon);
@@ -283,7 +283,7 @@ namespace GPSManager
         {
             foreach (var polygon in polygonLayer.GetFeatures().OfType<Polygon>())
             {
-                polygon.IsHighlighed = false;
+                polygon.IsHighlighted = false;
             }
             RefreshLayer(polygonLayer);
         }

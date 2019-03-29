@@ -36,17 +36,26 @@ namespace GPSManager
                 isHighlighed = value;
                 if(isHighlighed)
                 {
-                    if (!Styles.Contains(highlightedStyle))
+                    // Style.Equals() is not symmetric, i. e.
+                    // style1.Equals(style2) could return false whilst
+                    // style2.Equals(style1) could return true.
+                    // That causes bugs.
+                    bool contains = StylesList.Any(s => ReferenceEquals(s, highlightedStyle));
+                    if (!contains)
                     {
-                        Styles.Add(highlightedStyle);
+                        StylesList.Add(highlightedStyle);
                     }
                 }
                 else
                 {
-                    Styles.Remove(highlightedStyle);
+                    StylesList.RemoveAll(s => ReferenceEquals(s, highlightedStyle));
                 }
             }
         }
+
+        // Introduced to have an opportunity to remove items by using a predicate
+        // because Style.Equals() is bugged.
+        private List<IStyle> StylesList => Styles as List<IStyle>;
 
         public Polygon(IEnumerable<Point> vertices, int id = 0, string name = null)
             : this(new MapsuiPolygon(new LinearRing(vertices)), id, name)
@@ -55,6 +64,8 @@ namespace GPSManager
 
         private Polygon(MapsuiPolygon mapsuiPolygon, int id, string name)
         {
+            Styles = new List<IStyle>();
+
             ID = id;
             Name = name;
             Geometry = this.mapsuiPolygon = mapsuiPolygon;

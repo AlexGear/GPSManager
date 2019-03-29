@@ -183,8 +183,8 @@ namespace GPSManager
         private void ZoomToPoint(Gga gga)
         {
             var center = Gga.ToMapsuiPoint(gga);
-            var offset = new Mapsui.Geometries.Point(1000, 1000);
-            mapControl.ZoomToBox(center - offset, center + offset);
+            var extent = new Mapsui.Geometries.Point(1000, 1000);
+            mapControl.ZoomToBox(center - extent, center + extent);
         }
 
         private void OnGgaProviderConnected()
@@ -257,11 +257,46 @@ namespace GPSManager
             bool wasntDrawing = EndPolygonDrawing() == null;
             if (wasntDrawing)
             {
-                var info = mapControl.GetMapInfo(e.GetPosition(mapControl).ToMapsui());
-                if (info.Feature is Polygon polygon)
+                var clickScreenPos = e.GetPosition(mapControl).ToMapsui();
+                var clickWorldPos = mapControl.Map.Viewport.ScreenToWorld(clickScreenPos);
+                IEnumerable<Polygon> polygons = GetPolygonsAt(clickWorldPos);
+                //var info = mapControl.GetMapInfo(e.GetPosition(mapControl).ToMapsui());
+                int count = polygons.Count();
+                if (count == 0)
                 {
-                    OnPolygonRightClick(polygon);
+                    return;
                 }
+                if (count == 1)
+                {
+                    OnPolygonRightClick(polygons.First());
+                }
+                else
+                {
+                    var contextMenu = new ContextMenu();
+                    contextMenu.Items.Add(new Label
+                    {
+                        Content = "Выберете полигон:",
+                        IsEnabled = false
+                    });
+                    foreach (var polygon in polygons) {
+                        var item = new MenuItem
+                        {
+                            Header = string.IsNullOrWhiteSpace(polygon.Name) ? "<безымянный полигон>" : polygon.Name
+                        };
+                        item.GotFocus += (s, ee) => { polygon.IsHighlighted = true; RefreshLayer(polygonLayer); };
+                        item.LostFocus += (s, ee) => { polygon.IsHighlighted = false; RefreshLayer(polygonLayer); };
+                        item.Click += (s, ee) => OnPolygonRightClick(polygon);
+                        contextMenu.Items.Add(item);
+                    }
+                    contextMenu.IsOpen = true;
+                }
+            }
+
+            IEnumerable<Polygon> GetPolygonsAt(Mapsui.Geometries.Point point)
+            {
+                var boundingBox = new BoundingBox(point, point);
+                var polygons = polygonLayer.GetFeaturesInView(boundingBox, 0.1f).OfType<Polygon>();
+                return polygons.Where(p => p.Geometry.Distance(point) <= 0);
             }
         }
 

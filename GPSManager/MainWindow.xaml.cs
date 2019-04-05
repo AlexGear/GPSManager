@@ -76,6 +76,41 @@ namespace GPSManager
             }
         }
 
+        class DbPlaceholder : IPolygonStorage
+        {
+            private List<Polygon> polygons = new List<Polygon>();
+            public IReadOnlyList<Polygon> Polygons => polygons;
+
+            public int InsertPolygonAndAssingID(Polygon polygon)
+            {
+                int maxId = polygons.Count != 0 ? polygons.Max(p => p.ID) : -1;
+                int newId = maxId + 1;
+                polygon.ID = newId;
+                polygons.Add(polygon);
+                return newId;
+            }
+
+            public bool RemovePolygon(Polygon polygon)
+            {
+                return polygons.Remove(polygon);
+            }
+
+            public bool UpdatePolygon(Polygon polygon)
+            {
+                var oldPolygon = polygons.Find(p => p.ID == polygon.ID);
+                if(oldPolygon == null)
+                {
+                    return false;
+                }
+                if(oldPolygon != polygon)
+                {
+                    polygons.Remove(oldPolygon);
+                    polygons.Add(polygon);
+                }
+                return true;
+            }
+        }
+
         protected override void OnKeyDown(KeyEventArgs e)
         {
             base.OnKeyDown(e);
@@ -102,7 +137,8 @@ namespace GPSManager
         {
             try
             {
-                var db = new Db();
+                //var db = new Db();
+                var db = new DbPlaceholder();
                 polygonStorage = db;
             }
             catch (SqlException ex)

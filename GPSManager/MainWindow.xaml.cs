@@ -137,8 +137,8 @@ namespace GPSManager
         {
             try
             {
-                //var db = new Db();
-                var db = new DbPlaceholder();
+                var db = new Db();
+                //var db = new DbPlaceholder();
                 polygonStorage = db;
             }
             catch (SqlException ex)

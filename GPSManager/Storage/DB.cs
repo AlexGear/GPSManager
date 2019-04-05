@@ -12,7 +12,7 @@ namespace GPSManager.Storage
 {
     class Db : IPolygonStorage
     {
-        private const string Server = "192.168.55.125";
+        private const string Server = "192.168.55.175";
         private const string DatabaseName = "RIT_MAP";
         private const string Username = "sa";
         private const string Password = "1234";

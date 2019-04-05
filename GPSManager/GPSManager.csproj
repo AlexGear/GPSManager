@@ -94,25 +94,26 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="BitmapResources.cs" />
-    <Compile Include="CurrentLocationLayer.cs" />
-    <Compile Include="DB.cs" />
-    <Compile Include="IConnectable.cs" />
-    <Compile Include="ILayerExtensions.cs" />
-    <Compile Include="Polygon.cs" />
-    <Compile Include="PolygonEditing.cs" />
-    <Compile Include="PolygonLayer.cs" />
+    <Compile Include="Util\BitmapResources.cs" />
+    <Compile Include="Location\CurrentLocationLayer.cs" />
+    <Compile Include="Storage\DB.cs" />
+    <Compile Include="Location\IConnectable.cs" />
+    <Compile Include="Util\ILayerExtensions.cs" />
+    <Compile Include="Polygons\Polygon.cs" />
+    <Compile Include="Polygons\PolygonEditing.cs" />
+    <Compile Include="Polygons\PolygonLayer.cs" />
     <Compile Include="PolygonNameDialog.xaml.cs">
       <DependentUpon>PolygonNameDialog.xaml</DependentUpon>
     </Compile>
-    <Compile Include="PolygonTool.cs" />
+    <Compile Include="Polygons\PolygonTool.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="TaskExtensions.cs" />
-    <Compile Include="TcpGgaProvider.cs" />
+    <Compile Include="Storage\IPolygonStorage.cs" />
+    <Compile Include="Util\TaskExtensions.cs" />
+    <Compile Include="Location\TcpGgaProvider.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -121,8 +122,8 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Gga.cs" />
-    <Compile Include="IGgaProvider.cs" />
+    <Compile Include="Location\Gga.cs" />
+    <Compile Include="Location\IGgaProvider.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>

@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GPSManager
+namespace GPSManager.Polygons
 {
     class PolygonLayer : WritableLayer
     {

@@ -6,8 +6,9 @@ using System.Net.Sockets;
 using System.Threading.Tasks;
 using System.IO;
 using System.Threading;
+using GPSManager.Util;
 
-namespace GPSManager
+namespace GPSManager.Location
 {
     class TcpGgaProvider : IGgaProvider, IConnectable
     {

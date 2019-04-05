@@ -1,4 +1,6 @@
-﻿using Mapsui.Geometries;
+﻿using GPSManager.Storage;
+using GPSManager.Util;
+using Mapsui.Geometries;
 using Mapsui.Layers;
 using Mapsui.Providers;
 using Mapsui.Styles;
@@ -10,7 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
-namespace GPSManager
+namespace GPSManager.Polygons
 {
     class PolygonEditing
     {
@@ -19,10 +21,11 @@ namespace GPSManager
         private MapControl mapControl;
         private WritableLayer polygonLayer;
         private WritableLayer draggingPointsLayer;
-        private Polygon editedPolygon;
         private DraggingFeature draggingFeature;
         private Point draggingOffset;
         private Feature insertionPreviewFeature;
+
+        public Polygon editedPolygon { get; private set; }
 
         public PolygonEditing(MapControl mapControl, WritableLayer polygonLayer)
         {

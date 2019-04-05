@@ -1,6 +1,6 @@
 ﻿using Mapsui.Layers;
 
-namespace GPSManager
+namespace GPSManager.Util
 {
     static class ILayerExtensions
     {

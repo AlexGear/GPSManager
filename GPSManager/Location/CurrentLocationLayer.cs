@@ -1,4 +1,5 @@
-﻿using Mapsui.Geometries;
+﻿using GPSManager.Util;
+using Mapsui.Geometries;
 using Mapsui.Layers;
 using Mapsui.Projection;
 using Mapsui.Providers;
@@ -10,7 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace GPSManager
+namespace GPSManager.Location
 {
     class CurrentLocationLayer : MemoryLayer
     {

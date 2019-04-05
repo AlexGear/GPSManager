@@ -1,6 +1,6 @@
 ﻿using Mapsui.Styles;
 
-namespace GPSManager
+namespace GPSManager.Util
 {
     static class BitmapResources
     {

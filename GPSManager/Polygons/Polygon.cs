@@ -8,8 +8,9 @@ using System.Text;
 using System.Threading.Tasks;
 
 using MapsuiPolygon = Mapsui.Geometries.Polygon;
+using GPSManager.Location;
 
-namespace GPSManager
+namespace GPSManager.Polygons
 {
     class Polygon : Feature
     {

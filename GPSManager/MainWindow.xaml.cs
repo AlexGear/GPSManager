@@ -195,6 +195,19 @@ namespace GPSManager
                 };
                 return item;
             }
+            MenuItem CreateModifyItem()
+            {
+                var item = new MenuItem
+                {
+                    Header = "Редактировать",
+                    Icon = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/Resources/EditPolygon.png")) }
+                };
+                item.Click += (s, e) =>
+                {
+                    polygonEditing.BeginEditing(polygon);
+                };
+                return item;
+            }
             MenuItem CreateRemoveItem()
             {
                 var item = new MenuItem
@@ -209,19 +222,6 @@ namespace GPSManager
                         polygonLayer.TryRemove(polygon);
                         polygonLayer.Refresh();
                     }
-                };
-                return item;
-            }
-            MenuItem CreateModifyItem()
-            {
-                var item = new MenuItem
-                {
-                    Header = "Редактировать",
-                    Icon = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/Resources/Edit.png")) }
-                };
-                item.Click += (s, e) =>
-                {
-                    polygonEditing.BeginEditing(polygon);
                 };
                 return item;
             }

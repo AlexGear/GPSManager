@@ -177,7 +177,7 @@
     <EmbeddedResource Include="Resources\Dragging.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\Edit.png">
+    <Resource Include="Resources\EditPolygon.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>

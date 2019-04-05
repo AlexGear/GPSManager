@@ -175,26 +175,12 @@ namespace GPSManager
         private ContextMenu CreatePolygonContextMenu(Polygon polygon)
         {
             var contextMenu = new ContextMenu();
-            contextMenu.Items.Add(CreateRenameItem());
             contextMenu.Items.Add(CreateModifyItem());
+            contextMenu.Items.Add(CreateRenameItem());
             contextMenu.Items.Add(CreateRemoveItem());
             return contextMenu;
 
             ///////// BUTTONS CREATION LOCAL FUNCS
-            MenuItem CreateRenameItem()
-            {
-                var item = new MenuItem
-                {
-                    Header = "Переименовать",
-                    Icon = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/Resources/Rename.png")) }
-                };
-                item.Click += (s, e) =>
-                {
-                    RenamePolygonDialog(polygon);
-                    polygonStorage.UpdatePolygon(polygon);
-                };
-                return item;
-            }
             MenuItem CreateModifyItem()
             {
                 var item = new MenuItem
@@ -206,6 +192,20 @@ namespace GPSManager
                 {
                     UnhighlightAllPolygons();
                     polygonEditing.BeginEditing(polygon);
+                };
+                return item;
+            }
+            MenuItem CreateRenameItem()
+            {
+                var item = new MenuItem
+                {
+                    Header = "Переименовать",
+                    Icon = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/Resources/Rename.png")) }
+                };
+                item.Click += (s, e) =>
+                {
+                    RenamePolygonDialog(polygon);
+                    polygonStorage.UpdatePolygon(polygon);
                 };
                 return item;
             }

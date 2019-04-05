@@ -32,6 +32,8 @@ namespace GPSManager
         private const string DisconnectedStatusText = "Нет подключения";
 
         private IGgaProvider ggaProvider;
+        
+        private IPolygonStorage polygonStorage;
 
         private WritableLayer polygonLayer;
 
@@ -46,7 +48,7 @@ namespace GPSManager
             connectStatusLabel.Content = DisconnectedStatusText;
         }
 
-        class Placeholder : IConnectable, IGgaProvider
+        class GgaProviderPlaceholder : IConnectable, IGgaProvider
         {
             public bool IsConnected => true;
 
@@ -54,7 +56,7 @@ namespace GPSManager
             public event Action Disconnected;
             public event Action<Gga> GgaProvided;
 
-            public Placeholder()
+            public GgaProviderPlaceholder()
             {
                 F();
             }
@@ -85,16 +87,23 @@ namespace GPSManager
 
         private void OnWindowLoaded(object sender, System.Windows.RoutedEventArgs e)
         {
-            InitializeGgaProvieder();
+            InitializeGgaProvider();
             polygonLayer = new PolygonLayer();
             InitializeMapControl();
-            polygonTool = new PolygonTool(mapControl, polygonLayer);
-            polygonEditing = new PolygonEditing(mapControl, polygonLayer);
 
+            InitStorage();
+            polygonLayer.AddRange(polygonStorage.Polygons);
+
+            polygonTool = new PolygonTool(mapControl, polygonLayer);
+            polygonEditing = new PolygonEditing(polygonStorage, mapControl, polygonLayer);
+        }
+
+        private void InitStorage()
+        {
             try
             {
-                DB.Load();
-                polygonLayer.AddRange(DB.Polygons);
+                var db = new Db();
+                polygonStorage = db;
             }
             catch (SqlException ex)
             {
@@ -103,9 +112,9 @@ namespace GPSManager
             }
         }
 
-        private void InitializeGgaProvieder()
+        private void InitializeGgaProvider()
         {
-            var tcpGgaProvider = new Placeholder();
+            var tcpGgaProvider = new GgaProviderPlaceholder();
             //var tcpGgaProvider = new TcpGgaProvider(Host, Port);
 
             ggaProvider = tcpGgaProvider;
@@ -146,7 +155,7 @@ namespace GPSManager
                 item.Click += (s, e) =>
                 {
                     RenamePolygonDialog(polygon);
-                    DB.UpdatePolygon(polygon);
+                    polygonStorage.UpdatePolygon(polygon);
                 };
                 return item;
             }
@@ -159,7 +168,7 @@ namespace GPSManager
                 };
                 item.Click += (s, e) =>
                 {
-                    if (DB.RemovePolygon(polygon))
+                    if (polygonStorage.RemovePolygon(polygon))
                     {
                         polygonLayer.TryRemove(polygon);
                         polygonLayer.Refresh();
@@ -233,7 +242,7 @@ namespace GPSManager
 
                     try
                     {
-                        DB.InsertPolygonAndAssingID(polygon);
+                        polygonStorage.InsertPolygonAndAssingID(polygon);
                     }
                     catch (SqlException ex)
                     {

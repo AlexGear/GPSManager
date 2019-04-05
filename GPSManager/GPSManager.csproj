@@ -96,7 +96,7 @@
     </ApplicationDefinition>
     <Compile Include="Util\BitmapResources.cs" />
     <Compile Include="Location\CurrentLocationLayer.cs" />
-    <Compile Include="Storage\DB.cs" />
+    <Compile Include="Storage\Db.cs" />
     <Compile Include="Location\IConnectable.cs" />
     <Compile Include="Util\ILayerExtensions.cs" />
     <Compile Include="Polygons\Polygon.cs" />

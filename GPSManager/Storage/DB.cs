@@ -10,19 +10,22 @@ using System.Windows;
 
 namespace GPSManager.Storage
 {
-    static class DB
+    class Db : IPolygonStorage
     {
-        private const string DataSource = "192.168.55.125";
+        private const string Server = "192.168.55.125";
         private const string DatabaseName = "RIT_MAP";
         private const string Username = "sa";
         private const string Password = "1234";
         private const string PolygonsTable = "POLYGONS";
 
-        private static List<Polygon> polygons;
+        private List<Polygon> polygons;
 
-        public static IReadOnlyList<Polygon> Polygons => polygons;
+        public IReadOnlyList<Polygon> Polygons => polygons;
 
-        public static void Load()
+        /// <summary>
+        /// Opens the database and loads polygons
+        /// </summary>
+        public Db()
         {
             using (var connection = OpenConnection())
             {
@@ -35,7 +38,7 @@ namespace GPSManager.Storage
         /// </summary>
         /// <param name="polygon"></param>
         /// <returns></returns>
-        public static int InsertPolygonAndAssingID(Polygon polygon)
+        public int InsertPolygonAndAssingID(Polygon polygon)
         {
             if(polygon == null)
             {
@@ -55,7 +58,7 @@ namespace GPSManager.Storage
             }
         }
 
-        public static bool RemovePolygon(Polygon polygon)
+        public bool RemovePolygon(Polygon polygon)
         {
             if(polygon == null)
             {
@@ -76,9 +79,37 @@ namespace GPSManager.Storage
             }
         }
 
-        private static SqlConnection OpenConnection()
+        public bool UpdatePolygon(Polygon polygon)
         {
-            var connectionString = $"Server={DataSource};Initial Catalog={DatabaseName};" +
+            if (polygon == null)
+            {
+                throw new ArgumentNullException(nameof(polygon));
+            }
+            using (var connection = OpenConnection())
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = $"UPDATE {PolygonsTable} SET " +
+                    $"NAME = @name, GEOMETRY = @geometry WHERE ID = @id";
+                command.Parameters.AddWithValue("@name", polygon.Name ?? "");
+                command.Parameters.AddWithValue("@geometry", polygon.GeometryText);
+                command.Parameters.AddWithValue("@id", polygon.ID);
+                bool updated = 1 == command.ExecuteNonQuery();
+                if (updated)
+                {
+                    var oldPolygonWithSameID = polygons.Find(p => p.ID == polygon.ID);
+                    if (oldPolygonWithSameID != polygon)
+                    {
+                        polygons.Remove(oldPolygonWithSameID);
+                        polygons.Add(polygon);
+                    }
+                }
+                return updated;
+            }
+        }
+
+        private SqlConnection OpenConnection()
+        {
+            var connectionString = $"Server={Server};Initial Catalog={DatabaseName};" +
                 $"Persist Security Info=True;User ID={Username};Password={Password}";
 
             var connection = new SqlConnection(connectionString);
@@ -86,7 +117,7 @@ namespace GPSManager.Storage
             return connection;
         }
 
-        private static IEnumerable<Polygon> LoadPolygons(SqlConnection connection)
+        private IEnumerable<Polygon> LoadPolygons(SqlConnection connection)
         {
             using (var adapter = new SqlDataAdapter())
             {
@@ -129,34 +160,6 @@ namespace GPSManager.Storage
             return Polygon.FromGeomText(row.Field<string>("GEOMETRY"),
                                         row.Field<int>("ID"),
                                         row.Field<string>("NAME"));
-        }
-
-        public static bool UpdatePolygon(Polygon polygon)
-        {
-            if (polygon == null)
-            {
-                throw new ArgumentNullException(nameof(polygon));
-            }
-            using (var connection = OpenConnection())
-            using (var command = connection.CreateCommand())
-            {
-                command.CommandText = $"UPDATE {PolygonsTable} SET " +
-                    $"NAME = @name, GEOMETRY = @geometry WHERE ID = @id";
-                command.Parameters.AddWithValue("@name", polygon.Name ?? "");
-                command.Parameters.AddWithValue("@geometry", polygon.GeometryText);
-                command.Parameters.AddWithValue("@id", polygon.ID);
-                bool updated = 1 == command.ExecuteNonQuery();
-                if (updated)
-                {
-                    var oldPolygonWithSameID = polygons.Find(p => p.ID == polygon.ID);
-                    if(oldPolygonWithSameID != polygon)
-                    {
-                        polygons.Remove(oldPolygonWithSameID);
-                        polygons.Add(polygon);
-                    }
-                }
-                return updated;
-            }
         }
     }
 }

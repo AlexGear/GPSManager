@@ -18,6 +18,7 @@ namespace GPSManager.Polygons
     {
         private const double VertexInsertionDistance = 10;
 
+        private IPolygonStorage storage;
         private MapControl mapControl;
         private WritableLayer polygonLayer;
         private WritableLayer draggingPointsLayer;
@@ -27,8 +28,9 @@ namespace GPSManager.Polygons
 
         public Polygon editedPolygon { get; private set; }
 
-        public PolygonEditing(MapControl mapControl, WritableLayer polygonLayer)
+        public PolygonEditing(IPolygonStorage polygonStorage, MapControl mapControl, WritableLayer polygonLayer)
         {
+            this.storage = polygonStorage;
             this.mapControl = mapControl;
             this.polygonLayer = polygonLayer;
 
@@ -65,7 +67,7 @@ namespace GPSManager.Polygons
             draggingPointsLayer.Refresh();
             if (editedPolygon != null)
             {
-                DB.UpdatePolygon(editedPolygon);
+                storage.UpdatePolygon(editedPolygon);
                 editedPolygon = null;
                 return true;
             }

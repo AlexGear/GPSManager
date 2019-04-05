@@ -204,6 +204,7 @@ namespace GPSManager
                 };
                 item.Click += (s, e) =>
                 {
+                    UnhighlightAllPolygons();
                     polygonEditing.BeginEditing(polygon);
                 };
                 return item;

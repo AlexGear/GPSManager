@@ -10,7 +10,7 @@ namespace GPSManager.Storage
     interface IPolygonStorage
     {
         IReadOnlyList<Polygon> Polygons { get; }
-        int InsertPolygonAndAssingID(Polygon polygon);
+        int InsertPolygonAndAssignID(Polygon polygon);
         bool RemovePolygon(Polygon polygon);
         bool UpdatePolygon(Polygon polygon);
     }

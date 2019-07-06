@@ -81,7 +81,7 @@ namespace GPSManager
             private List<Polygon> polygons = new List<Polygon>();
             public IReadOnlyList<Polygon> Polygons => polygons;
 
-            public int InsertPolygonAndAssingID(Polygon polygon)
+            public int InsertPolygonAndAssignID(Polygon polygon)
             {
                 int maxId = polygons.Count != 0 ? polygons.Max(p => p.ID) : -1;
                 int newId = maxId + 1;
@@ -137,8 +137,8 @@ namespace GPSManager
         {
             try
             {
-                var db = new Db();
-                //var db = new DbPlaceholder();
+                //var db = new Db();
+                var db = new DbPlaceholder();
                 polygonStorage = db;
             }
             catch (SqlException ex)
@@ -279,7 +279,7 @@ namespace GPSManager
 
                     try
                     {
-                        polygonStorage.InsertPolygonAndAssingID(polygon);
+                        polygonStorage.InsertPolygonAndAssignID(polygon);
                     }
                     catch (SqlException ex)
                     {

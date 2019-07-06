@@ -38,7 +38,7 @@ namespace GPSManager.Storage
         /// </summary>
         /// <param name="polygon"></param>
         /// <returns></returns>
-        public int InsertPolygonAndAssingID(Polygon polygon)
+        public int InsertPolygonAndAssignID(Polygon polygon)
         {
             if(polygon == null)
             {
